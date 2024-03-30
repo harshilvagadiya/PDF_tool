@@ -25,7 +25,8 @@ def extract_data_from_pdf(pdf_path):
 
     """Regular expression patterns"""
     model_pattern = r'Model.*$'
-    size_pattern = r"Size (.+?)(?=Rollers|$)"
+    # size_pattern = r"Size (.+?)(?=Rollers|$)"
+    size_pattern = r"Size ([^\n]+)"
     rollers_pattern = r"Rollers ([^\n]+)"
     quantity_pattern = r'Quantity\s*(\d+)'
     track_radius_pattern = r"Track Radius (\d+) IN\."
@@ -103,12 +104,19 @@ def extract_data_from_pdf(pdf_path):
     cable_size_match = re.search(cable_size_pattern, text)
     weight_match = re.search(weight_pattern, text)
 
+    # print("size_match>>>>>>>>",size_match)
+    # if pdf_path != r"C:\Custom_Workspace\django_workspace\PDF_to_excel\new_git_tool\PDF_tool\PSF_fils\3206 8.2X10.6_QuoteReport_3_16_2024.pdf":
+    # print("----",size_match.group(1).split(", ")[1])
+    # print("[][][][]]",(size_match.group(1).split(", ")[1]).split("Rollers")[0] if "Rollers" in size_match.group(1) else size_match.group(1).split(", ")[1])
+    # breakpoint( )
+    #     breakpoint( )
+
     # Extract matched groups
     data = {
         "Model": model_match.group(0)[6:] if model_match else None,
         "Quantity": quantity_match.group(1) if quantity_match else None,
         "Wide": size_match.group(1).split(", ")[0] if size_match else None,
-        "High": size_match.group(1).split(", ")[1] if size_match else None,
+        "High": (size_match.group(1).split(", ")[1]).split("Rollers")[0] if "Rollers" in size_match.group(1) else size_match.group(1).split(", ")[1],
         "Rollers": rollers_match.group(1) if rollers_match else None,
         "Track Radius": track_radius_match.group(0)[13:] if track_radius_match else None,
         "Strut Size": strut_size_match.group(0)[11:] if strut_size_match else None,
@@ -131,7 +139,7 @@ def extract_data_from_pdf(pdf_path):
         "Shaft Diameter": shaft_diameter_match.group(0)[15:] if shaft_diameter_match else None,
         "Prod length": prod_length_match.group(0)[13:] if prod_length_match else None,
         "Auxilary Bearings": auxilary_bearings_match.group(0)[18:] if auxilary_bearings_match else None,
-        "Spring Turns": spring_turns_match.greoup(0)[13:] if spring_turns_match else None,
+        "Spring Turns": spring_turns_match.group(0)[13:] if spring_turns_match else None,
         "Cable Size": cable_size_match.group(0)[11:] if cable_size_match else None,
         "Weight": weight_match.group(0)[6:] if weight_match else None,
         "Section Bundles": tbl_dict['# Section Bundles'], 
