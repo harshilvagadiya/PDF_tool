@@ -53,7 +53,8 @@ def extract_data_from_pdf(pdf_path):
     spring_turns_pattern = r"Spring Turns(.+?)(?=Cable Size|$)"
     cable_size_pattern = r"Cable Size ([^\n]+)"
     weight_pattern = r"Weight ([^\n]+)"
-    
+    only_model_pattern = r"Model\s*:\s*(.+)"
+
     tbl_dict = {'# Section Bundles': '0', '# Hardware Cartons': '0', '# Track Bundles': '0', '# of Struts': '0', '# Torsion Springs': '0', 'Feet of VDS': '0'}
 
     lines = text.strip().split('\n')
@@ -104,21 +105,14 @@ def extract_data_from_pdf(pdf_path):
     cable_size_match = re.search(cable_size_pattern, text)
     weight_match = re.search(weight_pattern, text)
 
-    # print("size_match>>>>>>>>",size_match)
-    # if pdf_path != r"C:\Custom_Workspace\django_workspace\PDF_to_excel\new_git_tool\PDF_tool\PSF_fils\3206 8.2X10.6_QuoteReport_3_16_2024.pdf":
-    # print("----",size_match.group(1).split(", ")[1])
-    # print("[][][][]]",(size_match.group(1).split(", ")[1]).split("Rollers")[0] if "Rollers" in size_match.group(1) else size_match.group(1).split(", ")[1])
-    # breakpoint( )
-    #     breakpoint( )
-    only_model_pattern = r"Model\s*:\s*(.+)"
 
     # Extract matched groups
     data = {
         "Model Description": model_match.group(0)[6:] if model_match else None,
         "Model": re.search(only_model_pattern, model_match.group(0)[6:]).group(1).strip(),
         "Quantity": quantity_match.group(1) if quantity_match else None,
-        "Wide": size_match.group(1).split(", ")[0] if size_match else None,
-        "High": (size_match.group(1).split(", ")[1]).split("Rollers")[0] if "Rollers" in size_match.group(1) else size_match.group(1).split(", ")[1],
+        "Wide": (size_match.group(1).split(", ")[0])[:-5] if size_match else None,
+        "High": ((size_match.group(1).split(", ")[1]).split("Rollers")[0]).split(" high")[0] if "Rollers" in size_match.group(1) else (size_match.group(1).split(", ")[1]),
         "Rollers": rollers_match.group(1) if rollers_match else None,
         "Track Radius": track_radius_match.group(0)[13:] if track_radius_match else None,
         "Strut Size": strut_size_match.group(0)[11:] if strut_size_match else None,
@@ -143,7 +137,7 @@ def extract_data_from_pdf(pdf_path):
         "Auxilary Bearings": auxilary_bearings_match.group(0)[18:] if auxilary_bearings_match else None,
         "Spring Turns": spring_turns_match.group(0)[13:] if spring_turns_match else None,
         "Cable Size": cable_size_match.group(0)[11:] if cable_size_match else None,
-        "Weight": weight_match.group(0)[6:] if weight_match else None,
+        "Weight": str(round(float(''.join(filter(lambda x: x.isdigit() or x == '.', weight_match.group(0)))), 2)) + " " + weight_match.group(0).split(" ")[-1] if weight_match else None,
         "Section Bundles": tbl_dict['# Section Bundles'], 
         "Hardware Cartons": tbl_dict['# Hardware Cartons'], 
         "Track Bundles": tbl_dict['# Track Bundles'], 
