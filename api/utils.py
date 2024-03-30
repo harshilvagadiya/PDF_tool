@@ -110,10 +110,12 @@ def extract_data_from_pdf(pdf_path):
     # print("[][][][]]",(size_match.group(1).split(", ")[1]).split("Rollers")[0] if "Rollers" in size_match.group(1) else size_match.group(1).split(", ")[1])
     # breakpoint( )
     #     breakpoint( )
+    only_model_pattern = r"Model\s*:\s*(.+)"
 
     # Extract matched groups
     data = {
-        "Model": model_match.group(0)[6:] if model_match else None,
+        "Model Description": model_match.group(0)[6:] if model_match else None,
+        "Model": re.search(only_model_pattern, model_match.group(0)[6:]).group(1).strip(),
         "Quantity": quantity_match.group(1) if quantity_match else None,
         "Wide": size_match.group(1).split(", ")[0] if size_match else None,
         "High": (size_match.group(1).split(", ")[1]).split("Rollers")[0] if "Rollers" in size_match.group(1) else size_match.group(1).split(", ")[1],
